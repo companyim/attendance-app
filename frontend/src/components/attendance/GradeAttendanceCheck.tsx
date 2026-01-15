@@ -176,68 +176,70 @@ export default function GradeAttendanceCheck() {
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-green-50">
-              <tr>
-                <th className="px-4 py-3 text-left">번호</th>
-                <th className="px-4 py-3 text-left">이름</th>
-                <th className="px-4 py-3 text-left">세례명</th>
-                <th className="px-4 py-3 text-left">달란트</th>
-                <th className="px-4 py-3 text-center">출석</th>
-                <th className="px-4 py-3 text-center">결석</th>
-                <th className="px-4 py-3 text-center">취소</th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.map(student => (
-                <tr key={student.id} className="border-t hover:bg-gray-50">
-                  <td className="px-4 py-3 text-blue-600 font-medium">{student.studentNumber}</td>
-                  <td className="px-4 py-3 font-medium">{student.name}</td>
-                  <td className="px-4 py-3 text-gray-600">{student.baptismName || '-'}</td>
-                  <td className="px-4 py-3">{student.talent}개</td>
-                  <td className="px-4 py-3 text-center">
-                    <button
-                      onClick={() => handleAttendanceChange(student.id, 'present')}
-                      className={`w-10 h-10 rounded-full ${
-                        attendanceMap[student.id] === 'present'
-                          ? 'bg-green-500 text-white'
-                          : 'bg-gray-200 hover:bg-green-200'
-                      }`}
-                    >
-                      ✓
-                    </button>
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <button
-                      onClick={() => handleAttendanceChange(student.id, 'absent')}
-                      className={`w-10 h-10 rounded-full ${
-                        attendanceMap[student.id] === 'absent'
-                          ? 'bg-red-500 text-white'
-                          : 'bg-gray-200 hover:bg-red-200'
-                      }`}
-                    >
-                      ✗
-                    </button>
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    {attendanceMap[student.id] && (
-                      <button
-                        onClick={() => {
-                          const newMap = { ...attendanceMap };
-                          delete newMap[student.id];
-                          setAttendanceMap(newMap);
-                        }}
-                        className="w-10 h-10 rounded-full bg-gray-300 hover:bg-gray-400 text-gray-600"
-                        title="출석 취소"
-                      >
-                        ↺
-                      </button>
-                    )}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[600px]">
+              <thead className="bg-green-50">
+                <tr>
+                  <th className="px-2 md:px-4 py-3 text-left whitespace-nowrap">번호</th>
+                  <th className="px-2 md:px-4 py-3 text-left whitespace-nowrap">이름</th>
+                  <th className="px-2 md:px-4 py-3 text-left whitespace-nowrap">세례명</th>
+                  <th className="px-2 md:px-4 py-3 text-left whitespace-nowrap">달란트</th>
+                  <th className="px-2 md:px-4 py-3 text-center whitespace-nowrap">출석</th>
+                  <th className="px-2 md:px-4 py-3 text-center whitespace-nowrap">결석</th>
+                  <th className="px-2 md:px-4 py-3 text-center whitespace-nowrap">취소</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {students.map(student => (
+                  <tr key={student.id} className="border-t hover:bg-gray-50">
+                    <td className="px-2 md:px-4 py-3 text-blue-600 font-medium whitespace-nowrap">{student.studentNumber}</td>
+                    <td className="px-2 md:px-4 py-3 font-medium whitespace-nowrap">{student.name}</td>
+                    <td className="px-2 md:px-4 py-3 text-gray-600 whitespace-nowrap">{student.baptismName || '-'}</td>
+                    <td className="px-2 md:px-4 py-3 whitespace-nowrap">{student.talent}개</td>
+                    <td className="px-2 md:px-4 py-3 text-center">
+                      <button
+                        onClick={() => handleAttendanceChange(student.id, 'present')}
+                        className={`w-8 h-8 md:w-10 md:h-10 rounded-full text-sm md:text-base ${
+                          attendanceMap[student.id] === 'present'
+                            ? 'bg-green-500 text-white'
+                            : 'bg-gray-200 hover:bg-green-200'
+                        }`}
+                      >
+                        ✓
+                      </button>
+                    </td>
+                    <td className="px-2 md:px-4 py-3 text-center">
+                      <button
+                        onClick={() => handleAttendanceChange(student.id, 'absent')}
+                        className={`w-8 h-8 md:w-10 md:h-10 rounded-full text-sm md:text-base ${
+                          attendanceMap[student.id] === 'absent'
+                            ? 'bg-red-500 text-white'
+                            : 'bg-gray-200 hover:bg-red-200'
+                        }`}
+                      >
+                        ✗
+                      </button>
+                    </td>
+                    <td className="px-2 md:px-4 py-3 text-center">
+                      {attendanceMap[student.id] && (
+                        <button
+                          onClick={() => {
+                            const newMap = { ...attendanceMap };
+                            delete newMap[student.id];
+                            setAttendanceMap(newMap);
+                          }}
+                          className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-300 hover:bg-gray-400 text-gray-600 text-sm md:text-base"
+                          title="출석 취소"
+                        >
+                          ↺
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

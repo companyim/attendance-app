@@ -20,7 +20,7 @@ function getGradePrefix(grade: string): string {
 
 /**
  * 학생 목록에 자동 번호(학번) 부여
- * 등록 순서(createdAt) 기준으로 번호 부여 - 새 학생은 마지막 번호
+ * 가나다순 정렬 후 번호 부여 - 새 학생은 마지막 번호
  */
 function assignStudentNumbers(students: any[]): any[] {
   // 학년별로 그룹화
@@ -34,13 +34,15 @@ function assignStudentNumbers(students: any[]): any[] {
     byGrade[grade].push(student);
   }
   
-  // 각 학년별로 등록순(createdAt) 정렬 후 번호 부여
+  // 각 학년별로 가나다순 정렬 후 번호 부여
   const result: any[] = [];
   for (const grade of Object.keys(byGrade)) {
-    // 등록 순서대로 정렬 (먼저 등록된 학생이 앞 번호)
-    const gradeStudents = byGrade[grade].sort((a, b) => 
-      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    );
+    // 가나다순 정렬 (이름 기준)
+    const gradeStudents = byGrade[grade].sort((a, b) => {
+      const nameA = a.name || '';
+      const nameB = b.name || '';
+      return nameA.localeCompare(nameB, 'ko');
+    });
     const prefix = getGradePrefix(grade);
     
     gradeStudents.forEach((student, index) => {
@@ -535,6 +537,21 @@ export async function uploadStudentsExcel(req: Request, res: Response) {
         console.log(`새 부서 생성: ${deptName}`);
       }
     }
+
+    // 학생 등록 전 정렬: 학년별 우선, 같은 학년 내에서 가나다순
+    students.sort((a, b) => {
+      // 1순위: 학년순
+      const gradeOrder = ['유치부', '1학년', '2학년', '첫영성체', '4학년', '5학년', '6학년'];
+      const aGradeOrder = gradeOrder.indexOf(a.grade);
+      const bGradeOrder = gradeOrder.indexOf(b.grade);
+      if (aGradeOrder !== bGradeOrder) {
+        return aGradeOrder - bGradeOrder;
+      }
+      // 2순위: 같은 학년이면 가나다순 (이름 기준)
+      const nameA = a.name || '';
+      const nameB = b.name || '';
+      return nameA.localeCompare(nameB, 'ko');
+    });
 
     // 학생 등록
     const created: any[] = [];
