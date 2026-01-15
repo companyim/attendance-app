@@ -303,15 +303,41 @@ export async function createStudent(req: Request, res: Response) {
       }
     }
 
+    // 같은 학년의 모든 학생을 가져와서 가나다순 정렬
+    const sameGradeStudents = await prisma.student.findMany({
+      where: { grade },
+      orderBy: { name: 'asc' },
+    });
+
+    // 가나다순 정렬
+    sameGradeStudents.sort((a, b) => {
+      const nameA = a.name || '';
+      const nameB = b.name || '';
+      return nameA.localeCompare(nameB, 'ko');
+    });
+
+    // 새 학생을 포함한 가나다순 정렬하여 위치 확인
+    const allStudents = [...sameGradeStudents, { name, grade } as any];
+    allStudents.sort((a, b) => {
+      const nameA = a.name || '';
+      const nameB = b.name || '';
+      return nameA.localeCompare(nameB, 'ko');
+    });
+
+    // 새 학생의 가나다순 위치에 맞는 번호 할당
+    const newStudentIndex = allStudents.findIndex(s => s.name === name);
+    const prefix = getGradePrefix(grade);
+    const autoStudentNumber = `${prefix}-${newStudentIndex + 1}`;
+
     const student = await prisma.student.create({
       data: {
         name,
         baptismName,
         grade,
-        departmentId,
-        studentNumber,
-        email,
-        phone,
+        departmentId: departmentId || null,
+        studentNumber: autoStudentNumber,
+        email: email || null,
+        phone: phone || null,
       },
       include: {
         department: true,
