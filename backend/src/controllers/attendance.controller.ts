@@ -15,7 +15,7 @@ export async function getAttendance(req: Request, res: Response) {
       date,
       startDate,
       endDate,
-      type, // 'grade' | 'department'
+      type, // 'doctrine' | 'mass' | 'department'
       page = '1',
       limit = '50',
     } = req.query;
@@ -117,11 +117,11 @@ export async function getAvailableDates(req: Request, res: Response) {
 
 /**
  * 출석 기록 생성/수정 (관리자만, 중복 체크 포함, 달란트 자동 지급)
- * type: 'grade' | 'department' - 학년 출석 또는 부서 출석
+ * type: 'doctrine' | 'mass' | 'department' - 교리출석, 미사출석, 부서출석
  */
 export async function upsertAttendance(req: Request, res: Response) {
   try {
-    const { studentId, departmentId, date, status, type = 'grade' } = req.body;
+    const { studentId, departmentId, date, status, type = 'doctrine' } = req.body;
 
     // 필수 필드 확인
     if (!studentId || !date || !status) {
@@ -148,9 +148,9 @@ export async function upsertAttendance(req: Request, res: Response) {
     }
 
     // 출석 타입 검증
-    if (type !== 'grade' && type !== 'department') {
+    if (type !== 'doctrine' && type !== 'mass' && type !== 'department') {
       return res.status(400).json({
-        error: '출석 타입은 학년(grade) 또는 부서(department)만 가능합니다.',
+        error: '출석 타입은 교리출석(doctrine), 미사출석(mass), 부서출석(department)만 가능합니다.',
       });
     }
 
@@ -184,8 +184,8 @@ export async function upsertAttendance(req: Request, res: Response) {
     const oldTalentGiven = existing?.talentGiven || 0;
     const talentGiven = status === 'present' ? 1 : 0;
 
-    const typeLabel = type === 'grade' ? '학년' : '부서';
-    const targetName = type === 'grade' ? student.grade : (department?.name || '');
+    const typeLabel = type === 'doctrine' ? '교리' : type === 'mass' ? '미사' : '부서';
+    const targetName = type === 'department' ? (department?.name || '') : student.grade;
 
     // 트랜잭션으로 출석 기록 저장/수정 및 달란트 처리
     const result = await prisma.$transaction(async (tx) => {

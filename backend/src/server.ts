@@ -17,13 +17,28 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // 미들웨어
+// CORS 설정: 여러 origin을 환경 변수로 설정 가능 (쉼표로 구분)
+const corsOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://attendance-app-one-neon.vercel.app',
+  ...(process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim()) : [])
+].filter(Boolean);
+
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'https://attendance-app-one-neon.vercel.app',
-    process.env.CORS_ORIGIN || ''
-  ].filter(Boolean),
+  origin: (origin, callback) => {
+    // origin이 없거나 (같은 도메인 요청) 허용된 origin 목록에 있으면 허용
+    if (!origin || corsOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      // 개발 환경에서는 모든 origin 허용 (네트워크 연결 편의를 위해)
+      if (process.env.NODE_ENV !== 'production') {
+        callback(null, true);
+      } else {
+        callback(new Error('CORS 정책에 의해 차단되었습니다.'));
+      }
+    }
+  },
   credentials: true,
 }));
 app.use(cookieParser());
@@ -66,8 +81,11 @@ async function startServer() {
     process.exit(1);
   }
 
-  app.listen(PORT, () => {
+  // 0.0.0.0으로 바인딩하여 모든 네트워크 인터페이스에서 접근 가능하게 함
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`서버가 포트 ${PORT}에서 실행 중입니다.`);
+    console.log(`로컬 접속: http://localhost:${PORT}`);
+    console.log(`네트워크 접속: http://[본인 PC의 IP 주소]:${PORT}`);
   });
 }
 

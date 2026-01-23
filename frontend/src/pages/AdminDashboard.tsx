@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Routes, Route, NavLink } from 'react-router-dom';
 import api from '../services/api';
-import GradeAttendanceCheck from '../components/attendance/GradeAttendanceCheck';
+import DoctrineAttendanceCheck from '../components/attendance/DoctrineAttendanceCheck';
+import MassAttendanceCheck from '../components/attendance/MassAttendanceCheck';
 import DepartmentAttendanceCheck from '../components/attendance/DepartmentAttendanceCheck';
 import StudentManagement from './StudentManagement';
 import Statistics from './Statistics';
@@ -59,9 +60,9 @@ export default function AdminDashboard() {
               <Button variant="secondary" onClick={() => navigate('/')}>
                 학생 조회 화면
               </Button>
-              <Button variant="secondary" onClick={handleLogout}>
-                로그아웃
-              </Button>
+            <Button variant="secondary" onClick={handleLogout}>
+              로그아웃
+            </Button>
             </div>
           </div>
           <nav className="flex gap-4 border-t pt-3">
@@ -69,10 +70,18 @@ export default function AdminDashboard() {
               to="/admin/dashboard"
               end
               className={({ isActive }) =>
-                `px-4 py-2 rounded-lg ${isActive ? 'bg-green-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`
+                `px-4 py-2 rounded-lg ${isActive ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`
               }
             >
-              학년 출석
+              교리출석
+            </NavLink>
+            <NavLink
+              to="/admin/dashboard/mass-attendance"
+              className={({ isActive }) =>
+                `px-4 py-2 rounded-lg ${isActive ? 'bg-orange-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`
+              }
+            >
+              미사출석
             </NavLink>
             <NavLink
               to="/admin/dashboard/department-attendance"
@@ -80,7 +89,7 @@ export default function AdminDashboard() {
                 `px-4 py-2 rounded-lg ${isActive ? 'bg-purple-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`
               }
             >
-              부서 출석
+              부서출석
             </NavLink>
             <NavLink
               to="/admin/dashboard/students"
@@ -104,7 +113,8 @@ export default function AdminDashboard() {
       
       <div className="max-w-7xl mx-auto">
         <Routes>
-          <Route index element={<GradeAttendanceCheck />} />
+          <Route index element={<DoctrineAttendanceCheck />} />
+          <Route path="mass-attendance" element={<MassAttendanceCheck />} />
           <Route path="department-attendance" element={<DepartmentAttendanceCheck />} />
           <Route path="students" element={<StudentManagement />} />
           <Route path="statistics" element={<Statistics />} />

@@ -2,14 +2,19 @@ services:
   - type: web
     name: attendance-app-backend
     env: node
-    buildCommand: npm install && npm run build
+    region: singapore
+    buildCommand: npm install && npx prisma generate && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
-      - key: JWT_SECRET
-        generateValue: true
+      - key: PORT
+        value: 3000
       - key: DATABASE_URL
         value: file:./prisma/dev.db
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
 
 

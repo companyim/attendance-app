@@ -587,7 +587,7 @@ export async function exportAllDataExcel(req: Request, res: Response) {
         studentName: att.student?.name || '',
         grade: att.student?.grade || '',
         department: att.department?.name || '',
-        type: att.type === 'grade' ? '학년출석' : '부서출석',
+        type: att.type === 'doctrine' ? '교리출석' : att.type === 'mass' ? '미사출석' : '부서출석',
         status: att.status === 'present' ? '출석' : '결석',
         talentGiven: att.talentGiven,
       });
@@ -721,12 +721,12 @@ export async function exportAllDataExcel(req: Request, res: Response) {
       fgColor: { argb: 'FFE0E0E0' },
     };
 
-    // 6. 날짜별 출석 현황표 (학년출석)
-    const gradeAttendanceSheet = workbook.addWorksheet('학년출석현황표');
+    // 6. 날짜별 출석 현황표 (교리출석 + 미사출석)
+    const gradeAttendanceSheet = workbook.addWorksheet('교리미사출석현황표');
     
-    // 학년출석 날짜 목록 가져오기
+    // 교리출석 및 미사출석 날짜 목록 가져오기
     const gradeAttendanceDates = await prisma.attendance.findMany({
-      where: { type: 'grade' },
+      where: { type: { in: ['doctrine', 'mass'] } },
       select: { date: true },
       distinct: ['date'],
       orderBy: { date: 'asc' },
@@ -744,9 +744,9 @@ export async function exportAllDataExcel(req: Request, res: Response) {
       { header: '출석률', key: 'rate', width: 8 },
     ];
 
-    // 학년출석 데이터
+    // 교리출석 및 미사출석 데이터
     const gradeAttendanceData = await prisma.attendance.findMany({
-      where: { type: 'grade' },
+      where: { type: { in: ['doctrine', 'mass'] } },
       select: {
         studentId: true,
         date: true,
