@@ -1,0 +1,18 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deployment notification
+        run: |
+          echo "코드가 GitHub에 푸시되었습니다."
+          echo "Vercel과 Render에서 자동 배포가 시작됩니다."
+          echo ""
+          echo "다음 단계:"
+          echo "1. Vercel: https://vercel.com - 프론트엔드 배포"
+          echo "2. Render: https://render.com - 백엔드 배포"
