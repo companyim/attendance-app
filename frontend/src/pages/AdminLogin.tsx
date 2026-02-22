@@ -27,7 +27,7 @@ export default function AdminLogin() {
         navigate('/admin/dashboard');
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || '로그인에 실패했습니다.');
+      setError(err?.userMessage || err.response?.data?.error || '로그인에 실패했습니다.');
     } finally {
       setIsLoading(false);
     }

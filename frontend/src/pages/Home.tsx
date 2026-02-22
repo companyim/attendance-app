@@ -44,7 +44,7 @@ export default function Home() {
         setSearchResults(students);
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || '학생을 찾을 수 없습니다.');
+      setError(err?.userMessage || err.response?.data?.error || '학생을 찾을 수 없습니다.');
     } finally {
       setLoading(false);
     }

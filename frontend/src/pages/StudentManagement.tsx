@@ -94,7 +94,7 @@ export default function StudentManagement() {
       closeModal();
       window.location.reload(); // 목록 새로고침
     } catch (err: any) {
-      setError(err.response?.data?.error || '저장에 실패했습니다.');
+      setError(err?.userMessage || err.response?.data?.error || '저장에 실패했습니다.');
     } finally {
       setLoading(false);
     }
@@ -107,7 +107,7 @@ export default function StudentManagement() {
       await api.delete(`/students/${studentId}`);
       window.location.reload();
     } catch (err: any) {
-      alert(err.response?.data?.error || '삭제에 실패했습니다.');
+      alert(err?.userMessage || err.response?.data?.error || '삭제에 실패했습니다.');
     }
   };
 
@@ -121,7 +121,7 @@ export default function StudentManagement() {
       alert('모든 데이터가 삭제되었습니다.');
       window.location.reload();
     } catch (err: any) {
-      alert(err.response?.data?.error || '삭제에 실패했습니다.');
+      alert(err?.userMessage || err.response?.data?.error || '삭제에 실패했습니다.');
     } finally {
       setDeleting(false);
     }

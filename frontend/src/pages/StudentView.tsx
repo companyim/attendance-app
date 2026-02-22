@@ -51,7 +51,7 @@ export default function StudentView() {
       const response = await api.get(`/students/name/${encodeURIComponent(studentName)}`);
       setData(response.data);
     } catch (err: any) {
-      setError(err.response?.data?.error || '학생 정보를 불러올 수 없습니다.');
+      setError(err?.userMessage || err.response?.data?.error || '학생 정보를 불러올 수 없습니다.');
     } finally {
       setLoading(false);
     }

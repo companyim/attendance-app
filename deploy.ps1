@@ -1,4 +1,6 @@
 # 출석부 앱 배포 스크립트
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
 
 Write-Host "=== 출석부 앱 배포 준비 ===" -ForegroundColor Green
 Write-Host ""

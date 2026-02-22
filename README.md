@@ -36,7 +36,7 @@
 
 1. **저장소 클론**
 ```bash
-git clone https://github.com/your-username/attendance-app.git
+git clone https://github.com/companyim/attendance-app.git
 cd attendance-app
 ```
 
@@ -116,6 +116,12 @@ CORS_ORIGIN=http://localhost:5173
 ```
 VITE_API_URL=http://localhost:3000/api
 ```
+
+## 한글 인코딩
+
+- 저장소의 한글 텍스트는 **UTF-8**로 저장되어 있습니다.
+- 수정 시에도 **UTF-8 (BOM 없음)**으로 저장해 주시면 GitHub에서 한글이 깨지지 않습니다.
+- `.gitattributes`에서 텍스트 파일의 줄 끝을 LF로 통일해 두었습니다.
 
 ## 라이선스
 

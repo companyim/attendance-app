@@ -5,3 +5,11 @@
 - **기준**: Ver.1과 동일한 상태에서 시작
 
 새 기능 추가나 수정은 이 폴더(`attendance-app-ver2`)에서 진행하세요.
+
+---
+
+**터미널에서 한글이 깨져 보일 때 (Ver.2: ??? …)**  
+PowerShell이 UTF-8이 아닌 코드 페이지를 쓰면 한글이 깨집니다.  
+- **한 번만**: 터미널에서 `chcp 65001` 실행  
+- **영구**: PowerShell 프로필에 `[Console]::OutputEncoding = [System.Text.Encoding]::UTF8` 추가  
+이 프로젝트의 `.ps1` 스크립트는 실행 시 UTF-8을 설정하도록 되어 있습니다.

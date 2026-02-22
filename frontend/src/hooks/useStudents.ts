@@ -26,7 +26,7 @@ export function useStudents(params: UseStudentsParams = {}) {
         const response = await api.get(`/students?${queryParams.toString()}`);
         setStudents(response.data.students || []);
       } catch (err: any) {
-        setError(err.response?.data?.error || '학생 목록을 불러오는데 실패했습니다.');
+        setError(err?.userMessage || err.response?.data?.error || '학생 목록을 불러오는데 실패했습니다.');
       } finally {
         setLoading(false);
       }

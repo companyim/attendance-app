@@ -33,11 +33,21 @@ git push origin main
 - 프론트엔드 URL 확인 (예: `https://attendance-app.vercel.app`)
 - 이 URL을 백엔드 `CORS_ORIGIN`에 설정해야 함
 
+## 2.5단계: 데이터베이스 (Neon PostgreSQL)
+
+- **Neon**은 **데이터베이스만** 제공합니다. API 서버는 아래 3단계에서 Render에 배포합니다.
+- [Neon 콘솔](https://console.neon.tech/app/org-square-thunder-90602815/projects)에서:
+  1. 프로젝트 선택 → **Connection string** 복사 (또는 Dashboard → 연결 정보)
+  2. 형식: `postgresql://user:password@ep-xxx.region.aws.neon.tech/neondb?sslmode=require`
+- 이 연결 문자열을 **3단계 Render**의 `DATABASE_URL`에 그대로 넣습니다.
+
 ## 3단계: Render에 백엔드 배포
+
+- **내 Render 프로젝트**: [dashboard.render.com 프로젝트 열기](https://dashboard.render.com/project/prj-d5f9abre5dus7393l10g)
 
 ### 빠른 배포 (10분)
 
-1. **Render 접속**: https://render.com
+1. **Render 접속**: https://render.com (또는 위 링크)
 2. **GitHub로 로그인**
 3. **"New +" → "Web Service" 클릭**
 4. **저장소 연결**: `companyim/attendance-app`
@@ -47,16 +57,17 @@ git push origin main
    - **Branch**: `main`
    - **Root Directory**: `backend` (중요!)
    - **Environment**: `Node`
-   - **Build Command**: `npm install && npx prisma generate && npm run build`
+   - **Build Command**: `npm install && npx prisma generate && npx prisma db push && npm run build`
    - **Start Command**: `npm start`
 6. **환경 변수 추가** (Environment Variables 섹션):
    ```
    NODE_ENV=production
    PORT=3000
-   DATABASE_URL=file:./prisma/dev.db
+   DATABASE_URL=<Neon에서 복사한 PostgreSQL 연결 문자열>
    ADMIN_PASSWORD=your-secure-password-here
    CORS_ORIGIN=https://your-frontend.vercel.app
    ```
+   ⚠️ `DATABASE_URL`은 Neon 콘솔에서 복사한 값으로 넣으세요.
    ⚠️ `ADMIN_PASSWORD`는 강력한 비밀번호로 변경하세요!
    ⚠️ `CORS_ORIGIN`은 프론트엔드 URL로 설정하세요!
 
@@ -75,7 +86,7 @@ git push origin main
 3. "Redeploy" 클릭
 
 ### 백엔드 (Render)
-1. Render 대시보드 → 서비스 → Environment
+1. [Render 프로젝트](https://dashboard.render.com/project/prj-d5f9abre5dus7393l10g) → 백엔드 **Web Service** 클릭 → **Environment**
 2. `CORS_ORIGIN` 확인:
    - Value: `https://attendance-app.vercel.app` (실제 프론트엔드 URL)
 3. "Save Changes" 클릭 (자동 재배포)
@@ -93,6 +104,13 @@ git push origin main
 
 ## 문제 해결
 
+### "서버에 연결할 수 없습니다" 오류 (배포 후)
+- **원인**: Vercel에 `VITE_API_URL`이 없거나 잘못됨. 빌드 시 기본값이 `http://localhost:3000/api`라서, 배포된 사이트에서는 백엔드에 연결되지 않습니다.
+- **해결**:
+  1. Vercel 대시보드 → 프로젝트 → **Settings** → **Environment Variables**
+  2. **VITE_API_URL** 추가(또는 수정): 값 = 백엔드 API 주소 (예: `https://attendance-app-backend.onrender.com/api`)
+  3. **Redeploy** 실행 (환경 변수 변경 후 재배포 필요)
+
 ### CORS 오류
 - 백엔드 `CORS_ORIGIN`에 프론트엔드 URL이 정확히 설정되었는지 확인
 - 프로토콜 포함 (https://)
@@ -101,9 +119,9 @@ git push origin main
 - 프론트엔드 `VITE_API_URL`이 올바른지 확인
 - `/api` 경로 포함 확인
 
-### 데이터베이스 오류
-- SQLite는 Render에서 파일 시스템 제한이 있을 수 있음
-- 필요시 PostgreSQL (Supabase) 사용 고려
+### 데이터베이스 연결 실패 / P1012 (Render 로그)
+- **원인**: `DATABASE_URL`이 Render Environment에 없거나 형식이 잘못됨
+- **해결**: Render → 서비스 → Environment → `DATABASE_URL`에 Neon 연결 문자열 **전체** 붙여넣기 (끝에 `?sslmode=require` 포함). 저장 후 재배포
 
 ## 배포 완료 체크리스트
 

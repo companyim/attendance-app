@@ -81,7 +81,7 @@ export default function ExcelUpload({ onSuccess }: { onSuccess?: () => void }) {
         onSuccess();
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || '업로드에 실패했습니다.');
+      setError(err?.userMessage || err.response?.data?.error || '업로드에 실패했습니다.');
     } finally {
       setUploading(false);
     }

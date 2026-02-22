@@ -1,0 +1,14 @@
+# 한글 등 UTF-8 텍스트가 GitHub에서 깨지지 않도록 텍스트 파일 규칙
+# https://docs.github.com/en/get-started/getting-started-with-git/managing-line-endings
+
+* text=auto eol=lf
+*.md text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.ps1 text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.html text eol=lf
+*.css text eol=lf

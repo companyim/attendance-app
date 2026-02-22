@@ -45,7 +45,7 @@ export default function DepartmentManagement() {
       closeModal();
       window.location.reload();
     } catch (err: any) {
-      setError(err.response?.data?.error || '저장에 실패했습니다.');
+      setError(err?.userMessage || err.response?.data?.error || '저장에 실패했습니다.');
     } finally {
       setSaving(false);
     }
@@ -58,7 +58,7 @@ export default function DepartmentManagement() {
       await api.delete(`/departments/${departmentId}`);
       window.location.reload();
     } catch (err: any) {
-      alert(err.response?.data?.error || '삭제에 실패했습니다.');
+      alert(err?.userMessage || err.response?.data?.error || '삭제에 실패했습니다.');
     }
   };
 
