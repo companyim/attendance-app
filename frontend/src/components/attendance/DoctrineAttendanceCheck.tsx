@@ -116,7 +116,7 @@ export default function DoctrineAttendanceCheck() {
         }
       }
       
-      setMessage(`교리출석이 저장되었습니다. (${successCount}명, 출석자 달란트 +1)`);
+      setMessage(`교리출석이 저장되었습니다. (${successCount}명, 미사출석 자동 반영, 출석자 달란트 +2)`);
     } catch (error: any) {
       setMessage(error.response?.data?.error || '저장 중 오류가 발생했습니다.');
     } finally {
@@ -126,10 +126,11 @@ export default function DoctrineAttendanceCheck() {
 
   return (
     <div className="p-4">
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex items-center gap-3 mb-4 flex-wrap">
         <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
         <h2 className="text-xl font-bold">교리출석 체크</h2>
         <span className="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded">출석 시 달란트 +1</span>
+        <span className="text-sm text-slate-600 bg-slate-100 px-2 py-1 rounded">✓ 미사출석도 자동 저장</span>
       </div>
 
       {/* 필터 영역 */}

@@ -118,6 +118,8 @@ export async function getAvailableDates(req: Request, res: Response) {
 /**
  * 출석 기록 생성/수정 (관리자만, 중복 체크 포함, 달란트 자동 지급)
  * type: 'doctrine' | 'mass' | 'department' - 교리출석, 미사출석, 부서출석
+ * - doctrine 저장 시: 미사출석도 자동 반영됨
+ * - mass 저장/수정 시: 미사만 변경, 교리출석에는 영향 없음
  */
 export async function upsertAttendance(req: Request, res: Response) {
   try {
@@ -262,6 +264,85 @@ export async function upsertAttendance(req: Request, res: Response) {
             },
           },
         });
+      }
+
+      // 교리출석 저장 시 미사출석도 동일하게 자동 저장
+      if (type === 'doctrine') {
+        const existingMass = await tx.attendance.findUnique({
+          where: {
+            studentId_date_type: {
+              studentId,
+              date: new Date(date),
+              type: 'mass',
+            },
+          },
+        });
+        const oldMassStatus = existingMass?.status;
+        const oldMassTalentGiven = existingMass?.talentGiven || 0;
+        const massTalentGiven = status === 'present' ? 1 : 0;
+
+        const massAttendance = await tx.attendance.upsert({
+          where: {
+            studentId_date_type: {
+              studentId,
+              date: new Date(date),
+              type: 'mass',
+            },
+          },
+          update: {
+            status,
+            talentGiven: massTalentGiven,
+            departmentId: null,
+          },
+          create: {
+            studentId,
+            departmentId: null,
+            date: new Date(date),
+            status,
+            type: 'mass',
+            talentGiven: massTalentGiven,
+          },
+          include: {
+            student: true,
+            department: true,
+          },
+        });
+
+        let massTalentDelta = 0;
+        if (oldMassStatus === 'present' && oldMassStatus !== status) {
+          massTalentDelta -= oldMassTalentGiven;
+          await tx.talentTransaction.create({
+            data: {
+              studentId,
+              type: 'spend',
+              amount: -oldMassTalentGiven,
+              reason: `미사 출석 상태 변경으로 인한 회수 (교리출석 연동, ${student.grade})`,
+              attendanceId: massAttendance.id,
+            },
+          });
+        }
+        if (status === 'present' && oldMassTalentGiven === 0) {
+          massTalentDelta += 1;
+          await tx.talentTransaction.create({
+            data: {
+              studentId,
+              type: 'earn',
+              amount: 1,
+              reason: `미사 출석 보상 (교리출석 연동, ${student.grade})`,
+              attendanceId: massAttendance.id,
+            },
+          });
+        }
+        if (massTalentDelta !== 0) {
+          await tx.student.update({
+            where: { id: studentId },
+            data: {
+              talent: {
+                increment: massTalentDelta,
+              },
+            },
+          });
+        }
       }
 
       return attendance;

@@ -13,17 +13,24 @@ interface DateDepartmentData {
   departments: { departmentId: string; departmentName: string; rate: number; present: number; total: number }[];
 }
 
+interface DateDoctrineMassData {
+  date: string;
+  doctrine: { grades: { grade: string; rate: number; present: number; total: number }[] };
+  mass: { grades: { grade: string; rate: number; present: number; total: number }[] };
+}
+
 export default function Statistics() {
   const [overview, setOverview] = useState<any>(null);
   const [gradesComparison, setGradesComparison] = useState<any>(null);
   const [departmentsComparison, setDepartmentsComparison] = useState<any>(null);
   const [dateGradeComparison, setDateGradeComparison] = useState<DateGradeData[]>([]);
+  const [dateDoctrineMassComparison, setDateDoctrineMassComparison] = useState<DateDoctrineMassData[]>([]);
   const [dateDepartmentComparison, setDateDepartmentComparison] = useState<DateDepartmentData[]>([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [selectedGrade, setSelectedGrade] = useState<string>('');
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'dateGrade' | 'dateDepartment'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'dateGrade' | 'dateDoctrineMass' | 'dateDepartment'>('overview');
 
   const { departments } = useDepartments();
 
@@ -38,11 +45,12 @@ export default function Statistics() {
       if (selectedGrade) params.grade = selectedGrade;
       if (selectedDepartment) params.departmentId = selectedDepartment;
 
-      const [overviewRes, gradesRes, deptRes, dateGradeRes, dateDeptRes] = await Promise.all([
+      const [overviewRes, gradesRes, deptRes, dateGradeRes, dateDoctrineMassRes, dateDeptRes] = await Promise.all([
         api.get('/statistics/overview', { params }),
         api.get('/statistics/grades'),
         api.get('/statistics/departments'),
         api.get('/statistics/date-grade-comparison'),
+        api.get('/statistics/date-doctrine-mass-comparison'),
         api.get('/statistics/date-department-comparison'),
       ]);
 
@@ -50,6 +58,7 @@ export default function Statistics() {
       setGradesComparison(gradesRes.data.comparison);
       setDepartmentsComparison(deptRes.data.comparison);
       setDateGradeComparison(dateGradeRes.data.comparison || []);
+      setDateDoctrineMassComparison(dateDoctrineMassRes.data.comparison || []);
       setDateDepartmentComparison(dateDeptRes.data.comparison || []);
     } catch (error) {
       console.error('통계 로드 실패:', error);
@@ -124,6 +133,16 @@ export default function Statistics() {
           날짜별 학년 비교
         </button>
         <button
+          onClick={() => setActiveTab('dateDoctrineMass')}
+          className={`px-4 py-2 rounded-t-lg font-medium ${
+            activeTab === 'dateDoctrineMass'
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-100 hover:bg-gray-200'
+          }`}
+        >
+          날짜별 교리·미사
+        </button>
+        <button
           onClick={() => setActiveTab('dateDepartment')}
           className={`px-4 py-2 rounded-t-lg font-medium ${
             activeTab === 'dateDepartment'
@@ -131,7 +150,7 @@ export default function Statistics() {
               : 'bg-gray-100 hover:bg-gray-200'
           }`}
         >
-          날짜별 부서 비교
+          날짜별 부서 출석
         </button>
       </div>
 
@@ -325,10 +344,94 @@ export default function Statistics() {
         </div>
       )}
 
-      {/* 날짜별 부서 비교 탭 */}
+      {/* 날짜별 교리·미사 탭 */}
+      {activeTab === 'dateDoctrineMass' && (
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-bold mb-4">📅 날짜별 교리·미사 출석률</h2>
+          {dateDoctrineMassComparison.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">출석 기록이 없습니다.</p>
+          ) : (
+            <div className="space-y-8">
+              {dateDoctrineMassComparison.map((dateData) => (
+                <div key={dateData.date} className="border rounded-lg p-4 space-y-4">
+                  <h3 className="text-lg font-semibold text-slate-800 border-b pb-2">{dateData.date}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="text-sm font-medium text-blue-700 mb-2">교리 출석 (학년별)</h4>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead className="bg-blue-50">
+                            <tr>
+                              <th className="px-2 py-1 text-left font-medium">학년</th>
+                              <th className="px-2 py-1 text-center font-medium">출석률</th>
+                              <th className="px-2 py-1 text-center font-medium">출석/총계</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {['유치부', '1학년', '2학년', '첫영성체', '4학년', '5학년', '6학년'].map((grade) => {
+                              const g = dateData.doctrine.grades.find(x => x.grade === grade);
+                              if (!g || g.total === 0) return <tr key={grade}><td className="px-2 py-1">{grade}</td><td className="px-2 py-1 text-center text-gray-400">-</td><td className="px-2 py-1 text-center text-gray-400">-</td></tr>;
+                              return (
+                                <tr key={grade} className="border-t">
+                                  <td className="px-2 py-1">{grade}</td>
+                                  <td className="px-2 py-1 text-center">
+                                    <span className={`inline-block px-2 py-0.5 rounded text-white text-xs ${getAttendanceColor(g.rate)}`}>{g.rate}%</span>
+                                  </td>
+                                  <td className="px-2 py-1 text-center text-gray-600">{g.present}/{g.total}</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-orange-700 mb-2">미사 출석 (학년별)</h4>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead className="bg-orange-50">
+                            <tr>
+                              <th className="px-2 py-1 text-left font-medium">학년</th>
+                              <th className="px-2 py-1 text-center font-medium">출석률</th>
+                              <th className="px-2 py-1 text-center font-medium">출석/총계</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {['유치부', '1학년', '2학년', '첫영성체', '4학년', '5학년', '6학년'].map((grade) => {
+                              const g = dateData.mass.grades.find(x => x.grade === grade);
+                              if (!g || g.total === 0) return <tr key={grade}><td className="px-2 py-1">{grade}</td><td className="px-2 py-1 text-center text-gray-400">-</td><td className="px-2 py-1 text-center text-gray-400">-</td></tr>;
+                              return (
+                                <tr key={grade} className="border-t">
+                                  <td className="px-2 py-1">{grade}</td>
+                                  <td className="px-2 py-1 text-center">
+                                    <span className={`inline-block px-2 py-0.5 rounded text-white text-xs ${getAttendanceColor(g.rate)}`}>{g.rate}%</span>
+                                  </td>
+                                  <td className="px-2 py-1 text-center text-gray-600">{g.present}/{g.total}</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="mt-4 flex gap-2 text-xs">
+            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-green-500 rounded"></span> 80%+</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-yellow-500 rounded"></span> 60-79%</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-orange-500 rounded"></span> 40-59%</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-red-500 rounded"></span> 40% 미만</span>
+          </div>
+        </div>
+      )}
+
+      {/* 날짜별 부서 출석 탭 */}
       {activeTab === 'dateDepartment' && (
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold mb-4">📅 날짜별 부서 출석률 비교</h2>
+          <h2 className="text-xl font-bold mb-4">📅 날짜별 부서 출석률</h2>
           {dateDepartmentComparison.length === 0 ? (
             <p className="text-gray-500 text-center py-8">출석 기록이 없습니다.</p>
           ) : (

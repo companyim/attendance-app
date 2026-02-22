@@ -116,7 +116,7 @@ export default function MassAttendanceCheck() {
         }
       }
       
-      setMessage(`미사출석이 저장되었습니다. (${successCount}명, 출석자 달란트 +1)`);
+      setMessage(`미사출석이 저장되었습니다. (${successCount}명, 교리출석과 무관하게 미사만 반영)`);
     } catch (error: any) {
       setMessage(error.response?.data?.error || '저장 중 오류가 발생했습니다.');
     } finally {
@@ -126,10 +126,11 @@ export default function MassAttendanceCheck() {
 
   return (
     <div className="p-4">
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex items-center gap-3 mb-4 flex-wrap">
         <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
         <h2 className="text-xl font-bold">미사출석 체크</h2>
         <span className="text-sm text-orange-600 bg-orange-100 px-2 py-1 rounded">출석 시 달란트 +1</span>
+        <span className="text-sm text-slate-600 bg-slate-100 px-2 py-1 rounded">수정 가능 · 교리출석과 별도</span>
       </div>
 
       {/* 필터 영역 */}
@@ -149,6 +150,11 @@ export default function MassAttendanceCheck() {
         {!selectedGrade && (
           <div className="mt-2 text-sm text-amber-600 bg-amber-50 p-2 rounded">
             ⚠️ 미사출석은 학년별로 체크합니다. 학년을 선택해주세요.
+          </div>
+        )}
+        {selectedGrade && (
+          <div className="mt-2 text-sm text-slate-600 bg-slate-50 p-2 rounded">
+            💡 여기서 수정해도 교리출석에는 영향 없습니다. 미사만 따로 수정할 수 있습니다.
           </div>
         )}
       </div>

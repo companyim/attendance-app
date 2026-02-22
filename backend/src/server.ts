@@ -14,7 +14,7 @@ import statisticsRoutes from './routes/statistics.routes';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 // 미들웨어
 // CORS 설정: 여러 origin을 환경 변수로 설정 가능 (쉼표로 구분)

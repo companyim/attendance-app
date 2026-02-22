@@ -13,6 +13,7 @@ router.get('/grades', statisticsController.getGradesComparison);
 router.get('/departments', statisticsController.getDepartmentsComparison);
 router.get('/talent', statisticsController.getTalentStatistics);
 router.get('/date-grade-comparison', statisticsController.getDateGradeComparison);
+router.get('/date-doctrine-mass-comparison', statisticsController.getDateDoctrineMassComparison);
 router.get('/date-department-comparison', statisticsController.getDateDepartmentComparison);
 router.get('/export-excel', statisticsController.exportAllDataExcel);
 

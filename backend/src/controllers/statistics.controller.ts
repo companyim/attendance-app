@@ -445,6 +445,82 @@ export async function getDateGradeComparison(req: Request, res: Response) {
 }
 
 /**
+ * 날짜별 교리·미사 출석률 비교 (타입별 분리)
+ */
+export async function getDateDoctrineMassComparison(req: Request, res: Response) {
+  try {
+    const grades = ['유치부', '1학년', '2학년', '첫영성체', '4학년', '5학년', '6학년'];
+
+    const allDates = await prisma.attendance.findMany({
+      select: { date: true },
+      distinct: ['date'],
+      orderBy: { date: 'desc' },
+      take: 30,
+    });
+    const dateList = allDates.map(d => d.date);
+
+    const result = await Promise.all(
+      dateList.map(async (date) => {
+        const getGradeStats = async (type: 'doctrine' | 'mass') =>
+          Promise.all(
+            grades.map(async (grade) => {
+              const students = await prisma.student.findMany({
+                where: { grade },
+                select: { id: true },
+              });
+              if (students.length === 0) return { grade, rate: 0, present: 0, total: 0 };
+              const studentIds = students.map(s => s.id);
+              const [total, present] = await Promise.all([
+                prisma.attendance.count({
+                  where: {
+                    date,
+                    type,
+                    studentId: { in: studentIds },
+                  },
+                }),
+                prisma.attendance.count({
+                  where: {
+                    date,
+                    type,
+                    studentId: { in: studentIds },
+                    status: 'present',
+                  },
+                }),
+              ]);
+              return {
+                grade,
+                rate: total > 0 ? Math.round((present / total) * 100) : 0,
+                present,
+                total,
+              };
+            })
+          );
+
+        const [doctrineGrades, massGrades] = await Promise.all([
+          getGradeStats('doctrine'),
+          getGradeStats('mass'),
+        ]);
+
+        const hasDoctrine = doctrineGrades.some(g => g.total > 0);
+        const hasMass = massGrades.some(g => g.total > 0);
+        if (!hasDoctrine && !hasMass) return null;
+
+        return {
+          date: date.toISOString().split('T')[0],
+          doctrine: { grades: doctrineGrades },
+          mass: { grades: massGrades },
+        };
+      })
+    );
+
+    return res.json({ comparison: result.filter(Boolean) });
+  } catch (error: any) {
+    console.error('날짜별 교리·미사 비교 조회 오류:', error);
+    return res.status(500).json({ error: '날짜별 교리·미사 비교 조회 중 오류가 발생했습니다.' });
+  }
+}
+
+/**
  * 날짜별 부서 출석률 비교
  */
 export async function getDateDepartmentComparison(req: Request, res: Response) {
