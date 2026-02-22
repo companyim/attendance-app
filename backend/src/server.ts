@@ -20,8 +20,10 @@ const PORT = Number(process.env.PORT) || 3000;
 // CORS 설정: 여러 origin을 환경 변수로 설정 가능 (쉼표로 구분)
 const corsOrigins = [
   'http://localhost:5173',
+  'http://localhost:5174',
   'http://localhost:3000',
   'https://attendance-app-one-neon.vercel.app',
+  'https://attendance-app2-wheat.vercel.app',
   ...(process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim()) : [])
 ].filter(Boolean);
 
