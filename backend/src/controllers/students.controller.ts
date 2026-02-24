@@ -487,9 +487,9 @@ export async function deleteStudent(req: Request, res: Response) {
 }
 
 /**
- * 엑셀 파일 업로드로 학생 일괄 등록 (관리자만)
+ * 엑셀 파일 프리뷰 (시트 목록, 열 헤더, 샘플 데이터 반환)
  */
-export async function uploadStudentsExcel(req: Request, res: Response) {
+export async function previewExcel(req: Request, res: Response) {
   try {
     if (!req.file) {
       return res.status(400).json({ error: '파일을 업로드해주세요.' });
@@ -498,7 +498,63 @@ export async function uploadStudentsExcel(req: Request, res: Response) {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(req.file.buffer as any);
 
-    const worksheet = workbook.worksheets[0];
+    const sheets = workbook.worksheets.map((ws, index) => {
+      const headers: string[] = [];
+      const sampleRows: string[][] = [];
+
+      const firstRow = ws.getRow(1);
+      const colCount = ws.columnCount || 0;
+      for (let c = 1; c <= colCount; c++) {
+        const val = firstRow.getCell(c).value?.toString().trim() || `열${c}`;
+        headers.push(val);
+      }
+
+      const maxPreview = Math.min(ws.rowCount, 6);
+      for (let r = 2; r <= maxPreview; r++) {
+        const row = ws.getRow(r);
+        const vals: string[] = [];
+        for (let c = 1; c <= colCount; c++) {
+          vals.push(row.getCell(c).value?.toString().trim() || '');
+        }
+        if (vals.some(v => v !== '')) {
+          sampleRows.push(vals);
+        }
+      }
+
+      return {
+        index,
+        name: ws.name,
+        headers,
+        sampleRows,
+        rowCount: ws.rowCount,
+      };
+    });
+
+    return res.json({ sheets });
+  } catch (error: any) {
+    console.error('엑셀 프리뷰 오류:', error);
+    return res.status(500).json({ error: '엑셀 파일을 읽는 중 오류가 발생했습니다.' });
+  }
+}
+
+/**
+ * 엑셀 파일 업로드로 학생 일괄 등록 (관리자만)
+ */
+export async function uploadStudentsExcel(req: Request, res: Response) {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: '파일을 업로드해주세요.' });
+    }
+
+    // 열 매핑 정보 파싱 (JSON 문자열로 전달됨)
+    const mapping = req.body.mapping ? JSON.parse(req.body.mapping) : null;
+    const sheetIndex = req.body.sheetIndex ? parseInt(req.body.sheetIndex, 10) : 0;
+    const headerRowIndex = req.body.headerRow ? parseInt(req.body.headerRow, 10) : 1;
+
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(req.file.buffer as any);
+
+    const worksheet = workbook.worksheets[sheetIndex];
     if (!worksheet) {
       return res.status(400).json({ error: '유효한 워크시트가 없습니다.' });
     }
@@ -540,32 +596,36 @@ export async function uploadStudentsExcel(req: Request, res: Response) {
       return { name: cleaned, baptismName: null };
     }
 
-    // 헤더 행 자동 감지: 첫 번째 행이 헤더인지 데이터인지 확인
-    let headerRow = 0;
-    const firstRow = worksheet.getRow(1);
-    const firstCellVal = firstRow.getCell(1).value?.toString().trim() || '';
-    const secondCellVal = firstRow.getCell(2).value?.toString().trim() || '';
-    if (secondCellVal && (secondCellVal.includes('이름') || secondCellVal.includes('학년') || secondCellVal.includes('번호'))) {
-      headerRow = 1;
-    }
+    // 열 매핑: 사용자가 지정한 열 번호 (1-based) 사용, 없으면 자동 감지
+    let colName = mapping?.name || 0;
+    let colBaptism = mapping?.baptismName || 0;
+    let colGrade = mapping?.grade || 0;
+    let colDepartment = mapping?.department || 0;
+    let colPhone = mapping?.phone || 0;
+    const nameIncludesBaptism = !colBaptism && colName;
 
-    // 열 순서 자동 감지
-    let colName = 2, colGrade = 3, colPhone = 4;
-    if (headerRow === 1) {
+    // 매핑이 없으면 헤더 기반 자동 감지
+    if (!mapping) {
+      const firstRow = worksheet.getRow(1);
+      colName = 2;
+      colGrade = 3;
+      colPhone = 4;
       for (let c = 1; c <= (worksheet.columnCount || 11); c++) {
         const val = firstRow.getCell(c).value?.toString().trim() || '';
         if (val.includes('이름')) colName = c;
         else if (val.includes('학년')) colGrade = c;
-        else if (val.includes('연락') || val.includes('전화') || val.includes('번호') && !val.includes('순')) colPhone = c;
+        else if (val.includes('연락') || val.includes('전화')) colPhone = c;
       }
     }
 
     worksheet.eachRow((row, rowNumber) => {
-      if (rowNumber <= headerRow) return;
+      if (rowNumber <= headerRowIndex) return;
 
-      const rawName = row.getCell(colName).value?.toString().trim();
-      const rawGrade = row.getCell(colGrade).value?.toString().trim();
-      const rawPhone = row.getCell(colPhone).value?.toString().trim() || null;
+      const rawName = colName ? row.getCell(colName).value?.toString().trim() : null;
+      const rawBaptism = colBaptism ? row.getCell(colBaptism).value?.toString().trim() : null;
+      const rawGrade = colGrade ? row.getCell(colGrade).value?.toString().trim() : null;
+      const rawDepartment = colDepartment ? row.getCell(colDepartment).value?.toString().trim() : null;
+      const rawPhone = colPhone ? row.getCell(colPhone).value?.toString().trim() : null;
 
       if (!rawName && !rawGrade) return;
 
@@ -585,7 +645,17 @@ export async function uploadStudentsExcel(req: Request, res: Response) {
         return;
       }
 
-      const { name, baptismName } = parseNameAndBaptism(rawName);
+      let name: string;
+      let baptismName: string | null;
+
+      if (colBaptism) {
+        name = rawName.replace(/[,/]/g, ' ').trim().split(/\s+/)[0] || rawName;
+        baptismName = rawBaptism || null;
+      } else {
+        const parsed = parseNameAndBaptism(rawName);
+        name = parsed.name;
+        baptismName = parsed.baptismName;
+      }
 
       if (!name) {
         errors.push(`${rowNumber}행: 이름을 파싱할 수 없습니다 (${rawName}).`);
@@ -596,8 +666,8 @@ export async function uploadStudentsExcel(req: Request, res: Response) {
         name,
         baptismName,
         grade,
-        phone: rawPhone,
-        departmentName: null,
+        phone: rawPhone || null,
+        departmentName: rawDepartment || null,
         studentNumber: null,
       });
     });

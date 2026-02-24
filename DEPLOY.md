@@ -67,3 +67,11 @@
 ```
 
 자세한 단계는 [CONNECT.md](./CONNECT.md), [DEPLOY_NOW.md](./DEPLOY_NOW.md) 참고.
+
+---
+
+## MODULE_NOT_FOUND / package.json 없음 오류
+
+- **원인**: Render의 **Root Directory**가 설정되지 않아 `backend` 폴더를 찾지 못함
+- **해결**: Render → 서비스 → **Settings** → **Build & Deploy** → **Root Directory**에 `backend` 입력 → Save
+- **Start Command**: `node dist/server.js` (또는 `npm start`) 유지

@@ -14,6 +14,7 @@ router.get('/:id', studentsController.getStudent);
 
 // 관리자 전용 API
 router.post('/', requireAdmin, studentsController.createStudent);
+router.post('/upload-excel/preview', requireAdmin, upload.single('file'), studentsController.previewExcel);
 router.post('/upload-excel', requireAdmin, upload.single('file'), studentsController.uploadStudentsExcel);
 router.put('/:id', requireAdmin, studentsController.updateStudent);
 router.put('/:id/department', requireAdmin, studentsController.updateStudentDepartment);

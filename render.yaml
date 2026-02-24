@@ -1,23 +1,21 @@
 # Render 배포 설정 (백엔드)
-# Neon PostgreSQL 사용 시: Render 대시보드에서 DATABASE_URL을 Neon 연결 문자열로 설정하세요.
+# Neon PostgreSQL: Render 대시보드에서 DATABASE_URL 설정
 services:
   - type: web
     name: attendance-app-backend
     env: node
     region: singapore
+    rootDir: backend
     buildCommand: npm install && npx prisma generate && npx prisma db push && npm run build
-    startCommand: npm start
+    startCommand: node dist/server.js
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 3000
-      # Neon 콘솔에서 복사한 PostgreSQL 연결 문자열을 Render 대시보드에서 설정
       - key: DATABASE_URL
         sync: false
       - key: ADMIN_PASSWORD
         sync: false
       - key: CORS_ORIGIN
         sync: false
-
-
