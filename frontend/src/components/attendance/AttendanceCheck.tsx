@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
-import { Student, Grade } from '../../types/Student';
+import { Student } from '../../types/Student';
 import { Department } from '../../types/Department';
 import GradeFilter from './GradeFilter';
 import DatePicker from './DatePicker';
@@ -9,7 +9,7 @@ import Button from '../common/Button';
 import TalentHistoryModal from '../common/TalentHistoryModal';
 
 export default function AttendanceCheck() {
-  const [selectedGrade, setSelectedGrade] = useState<Grade | ''>('');
+  const [selectedGrade, setSelectedGrade] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [students, setStudents] = useState<Student[]>([]);

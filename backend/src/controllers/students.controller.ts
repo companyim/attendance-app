@@ -95,7 +95,8 @@ export async function getStudents(req: Request, res: Response) {
     }
 
     if (grade) {
-      where.grade = grade;
+      const gradeStr = grade as string;
+      where.grade = gradeStr.includes(',') ? { in: gradeStr.split(',') } : gradeStr;
     }
 
     if (departmentId) {

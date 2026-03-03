@@ -22,7 +22,7 @@ interface StudentFormData {
 }
 
 export default function StudentManagement() {
-  const [selectedGrade, setSelectedGrade] = useState<Grade | ''>('');
+  const [selectedGrade, setSelectedGrade] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);

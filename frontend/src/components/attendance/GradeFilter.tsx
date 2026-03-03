@@ -1,13 +1,18 @@
-import { Grade } from '../../types/Student';
-
 interface GradeFilterProps {
-  selectedGrade: Grade | '';
-  onGradeChange: (grade: Grade | '') => void;
+  selectedGrade: string;
+  onGradeChange: (grade: string) => void;
   required?: boolean;
   label?: string;
 }
 
-const GRADES: Grade[] = ['유치부', '1학년', '2학년', '첫영성체', '4학년', '5학년', '6학년'];
+const FILTER_OPTIONS = [
+  { value: '유치부,1학년', label: '유치부 & 1학년' },
+  { value: '2학년', label: '2학년' },
+  { value: '첫영성체', label: '첫영성체' },
+  { value: '4학년', label: '4학년' },
+  { value: '5학년', label: '5학년' },
+  { value: '6학년', label: '6학년' },
+];
 
 export default function GradeFilter({ 
   selectedGrade, 
@@ -23,15 +28,15 @@ export default function GradeFilter({
       </label>
       <select
         value={selectedGrade}
-        onChange={(e) => onGradeChange(e.target.value as Grade | '')}
+        onChange={(e) => onGradeChange(e.target.value)}
         className="w-full p-2 border border-gray-300 rounded-lg"
         required={required}
       >
         {!required && <option value="">전체</option>}
         {required && <option value="">학년을 선택하세요</option>}
-        {GRADES.map((grade) => (
-          <option key={grade} value={grade}>
-            {grade}
+        {FILTER_OPTIONS.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
           </option>
         ))}
       </select>

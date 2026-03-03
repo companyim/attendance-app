@@ -63,8 +63,10 @@ export async function getAttendance(req: Request, res: Response) {
 
     // 학년 필터링 (학생을 통해)
     if (grade) {
+      const gradeStr = grade as string;
+      const gradeWhere = gradeStr.includes(',') ? { in: gradeStr.split(',') } : gradeStr;
       const students = await prisma.student.findMany({
-        where: { grade: grade as string },
+        where: { grade: gradeWhere },
         select: { id: true },
       });
       where.studentId = { in: students.map(s => s.id) };
@@ -521,8 +523,9 @@ export async function getAttendanceByGrade(req: Request, res: Response) {
     const { grade } = req.params;
     const { date, startDate, endDate } = req.query;
 
+    const gradeWhere = grade.includes(',') ? { in: grade.split(',') } : grade;
     const students = await prisma.student.findMany({
-      where: { grade },
+      where: { grade: gradeWhere },
       select: { id: true },
     });
 
