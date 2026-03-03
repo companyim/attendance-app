@@ -394,17 +394,18 @@ export async function updateStudent(req: Request, res: Response) {
       }
     }
 
+    const updateData: any = {};
+    if (name) updateData.name = name;
+    if (grade) updateData.grade = grade;
+    if (baptismName !== undefined) updateData.baptismName = baptismName || null;
+    if (departmentId !== undefined) updateData.departmentId = departmentId || null;
+    if (studentNumber !== undefined) updateData.studentNumber = studentNumber || null;
+    if (email !== undefined) updateData.email = email || null;
+    if (phone !== undefined) updateData.phone = phone || null;
+
     const student = await prisma.student.update({
       where: { id },
-      data: {
-        ...(name && { name }),
-        ...(baptismName !== undefined && { baptismName }),
-        ...(grade && { grade }),
-        ...(departmentId !== undefined && { departmentId: departmentId || null }),
-        ...(studentNumber !== undefined && { studentNumber }),
-        ...(email !== undefined && { email }),
-        ...(phone !== undefined && { phone }),
-      },
+      data: updateData,
       include: {
         department: true,
       },
@@ -413,7 +414,7 @@ export async function updateStudent(req: Request, res: Response) {
     return res.json(student);
   } catch (error: any) {
     console.error('학생 수정 오류:', error);
-    return res.status(500).json({ error: '학생 수정 중 오류가 발생했습니다.' });
+    return res.status(500).json({ error: error.message || '학생 수정 중 오류가 발생했습니다.' });
   }
 }
 
