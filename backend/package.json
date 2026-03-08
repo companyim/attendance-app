@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "npx prisma generate && tsc",
+    "build": "node prebuild-migrate.js && npx prisma db push --accept-data-loss && npx prisma generate && tsc",
     "start": "node dist/server.js",
     "postinstall": "npx prisma generate",
     "seed:departments": "tsx src/scripts/seedDepartments.ts"
