@@ -10,6 +10,7 @@ interface Attendance {
   date: string;
   status: 'present' | 'absent';
   department: Department;
+  departmentName?: string;
   talentGiven: number;
 }
 
