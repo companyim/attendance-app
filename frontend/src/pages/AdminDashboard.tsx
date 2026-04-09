@@ -6,6 +6,8 @@ import MassAttendanceCheck from '../components/attendance/MassAttendanceCheck';
 import DepartmentAttendanceCheck from '../components/attendance/DepartmentAttendanceCheck';
 import StudentManagement from './StudentManagement';
 import Statistics from './Statistics';
+import AdminShopProducts from './AdminShopProducts';
+import AdminShopOrders from './AdminShopOrders';
 import Button from '../components/common/Button';
 
 export default function AdminDashboard() {
@@ -107,10 +109,41 @@ export default function AdminDashboard() {
             >
               통계
             </NavLink>
+            <NavLink
+              to="/admin/dashboard/shop-products"
+              className={({ isActive }) =>
+                `px-4 py-2 rounded-lg ${isActive ? 'bg-amber-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`
+              }
+            >
+              상품관리
+            </NavLink>
+            <NavLink
+              to="/admin/dashboard/shop-orders"
+              className={({ isActive }) =>
+                `px-4 py-2 rounded-lg ${isActive ? 'bg-amber-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`
+              }
+            >
+              신청관리
+            </NavLink>
           </nav>
         </div>
       </div>
       
+      <div className="max-w-7xl mx-auto px-4 mb-4">
+        <div
+          onClick={() => window.open('/shop/login', '_blank')}
+          className="bg-gradient-to-r from-amber-400 to-amber-500 rounded-xl p-4 cursor-pointer hover:from-amber-500 hover:to-amber-600 transition shadow-md"
+        >
+          <div className="flex items-center justify-between text-white">
+            <div>
+              <h3 className="text-lg font-bold">🪙 달란트 상점 미리보기</h3>
+              <p className="text-amber-100 text-sm mt-1">학생이 보는 상점 화면을 새 탭에서 확인합니다</p>
+            </div>
+            <span className="text-2xl">→</span>
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto">
         <Routes>
           <Route index element={<DoctrineAttendanceCheck />} />
@@ -118,6 +151,8 @@ export default function AdminDashboard() {
           <Route path="department-attendance" element={<DepartmentAttendanceCheck />} />
           <Route path="students" element={<StudentManagement />} />
           <Route path="statistics" element={<Statistics />} />
+          <Route path="shop-products" element={<AdminShopProducts />} />
+          <Route path="shop-orders" element={<AdminShopOrders />} />
         </Routes>
       </div>
     </div>

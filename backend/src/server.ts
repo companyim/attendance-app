@@ -11,6 +11,9 @@ import studentRoutes from './routes/students.routes';
 import attendanceRoutes from './routes/attendance.routes';
 import talentRoutes from './routes/talents.routes';
 import statisticsRoutes from './routes/statistics.routes';
+import studentAuthRoutes from './routes/studentAuth.routes';
+import shopRoutes from './routes/shop.routes';
+import uploadRoutes from './routes/upload.routes';
 
 dotenv.config();
 
@@ -64,8 +67,9 @@ app.use('/api/students', studentRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/talents', talentRoutes);
 app.use('/api/statistics', statisticsRoutes);
-// app.use('/api/students', studentRoutes);
-// app.use('/api/attendance', attendanceRoutes);
+app.use('/api/student-auth', studentAuthRoutes);
+app.use('/api/shop', shopRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // 에러 핸들링
 app.use(errorHandler);
