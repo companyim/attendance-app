@@ -4,7 +4,7 @@ import { useShop } from '../../contexts/ShopContext';
 
 export default function ShopLogin() {
   const [name, setName] = useState('');
-  const [baptismName, setBaptismName] = useState('');
+  const [grade, setGrade] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login, student } = useShop();
@@ -22,7 +22,7 @@ export default function ShopLogin() {
     setLoading(true);
 
     try {
-      await login(name, baptismName);
+      await login(name, grade);
       navigate('/shop');
     } catch (err: any) {
       setError(err.response?.data?.error || '로그인에 실패했습니다.');
@@ -37,10 +37,28 @@ export default function ShopLogin() {
         <div className="text-center mb-6">
           <div className="text-5xl mb-3">🪙</div>
           <h1 className="text-2xl font-bold text-gray-800">달란트 상점</h1>
-          <p className="text-gray-500 text-sm mt-1">이름과 세례명으로 로그인하세요</p>
+          <p className="text-gray-500 text-sm mt-1">학년과 이름으로 로그인하세요</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">학년</label>
+            <select
+              value={grade}
+              onChange={(e) => setGrade(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-400 focus:border-transparent outline-none transition"
+              required
+            >
+              <option value="">학년 선택</option>
+              <option value="1학년">1학년</option>
+              <option value="2학년">2학년</option>
+              <option value="3학년">3학년</option>
+              <option value="4학년">4학년</option>
+              <option value="5학년">5학년</option>
+              <option value="6학년">6학년</option>
+            </select>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">이름</label>
             <input
@@ -49,18 +67,6 @@ export default function ShopLogin() {
               onChange={(e) => setName(e.target.value)}
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-400 focus:border-transparent outline-none transition"
               placeholder="홍길동"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">세례명</label>
-            <input
-              type="text"
-              value={baptismName}
-              onChange={(e) => setBaptismName(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-400 focus:border-transparent outline-none transition"
-              placeholder="베드로"
               required
             />
           </div>

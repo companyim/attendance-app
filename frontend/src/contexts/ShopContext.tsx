@@ -22,7 +22,7 @@ interface ShopContextType {
   student: StudentInfo | null;
   cart: CartItem[];
   cartTotal: number;
-  login: (name: string, baptismName: string) => Promise<void>;
+  login: (name: string, grade: string) => Promise<void>;
   logout: () => void;
   refreshStudent: () => Promise<void>;
   addToCart: (item: Omit<CartItem, 'quantity'>) => void;
@@ -49,8 +49,8 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
   const cartTotal = cart.reduce((sum, item) => sum + item.talentPrice * item.quantity, 0);
 
-  const login = async (name: string, baptismName: string) => {
-    const res = await shopApi.post('/student-auth/login', { name, baptismName });
+  const login = async (name: string, grade: string) => {
+    const res = await shopApi.post('/student-auth/login', { name, grade });
     localStorage.setItem('studentToken', res.data.token);
     localStorage.setItem('studentInfo', JSON.stringify(res.data.student));
     setStudent(res.data.student);

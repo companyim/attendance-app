@@ -6,16 +6,16 @@ const router = Router();
 
 router.post('/login', async (req: Request, res: Response) => {
   try {
-    const { name, baptismName } = req.body;
+    const { name, grade } = req.body;
 
-    if (!name || !baptismName) {
-      return res.status(400).json({ error: '이름과 세례명을 입력해주세요.' });
+    if (!name || !grade) {
+      return res.status(400).json({ error: '학년과 이름을 입력해주세요.' });
     }
 
     const student = await prisma.student.findFirst({
       where: {
         name: name.trim(),
-        baptismName: baptismName.trim(),
+        grade: grade.trim(),
       },
       include: {
         studentDepartments: { include: { department: true } },
