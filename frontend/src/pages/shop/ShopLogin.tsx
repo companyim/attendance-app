@@ -50,9 +50,10 @@ export default function ShopLogin() {
               required
             >
               <option value="">학년 선택</option>
+              <option value="유치부">유치부</option>
               <option value="1학년">1학년</option>
               <option value="2학년">2학년</option>
-              <option value="3학년">3학년</option>
+              <option value="첫영성체">첫영성체</option>
               <option value="4학년">4학년</option>
               <option value="5학년">5학년</option>
               <option value="6학년">6학년</option>
